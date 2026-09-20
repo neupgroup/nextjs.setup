@@ -84,9 +84,11 @@ while (($#)); do
 done
 
 case "$mode" in
-  install)
+  install|preinstall|postinstall|predev)
+    mode="install"
     ;;
-  optimize)
+  optimize|prebuild|postbuild)
+    mode="optimize"
     ;;
   install-clean|clean-install)
     force_sync=true
