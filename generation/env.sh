@@ -2,10 +2,10 @@
 
 set -Eeuo pipefail
 
-# Located at .neup/setup/nextjs/generation/env.sh in the guidelines checkout.
+# Located at .neup/setup/generation/env.sh in the guidelines checkout.
 # An optional argument selects the application root for standalone use.
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_DIR="${1:-$SCRIPT_DIR/../../../..}"
+readonly PROJECT_DIR="${1:-$SCRIPT_DIR/../../..}"
 
 node - "$PROJECT_DIR" <<'NODE'
 const fs = require('fs');

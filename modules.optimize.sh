@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-readonly NEUP_DIR="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
+readonly NEUP_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 readonly CORE_SETUP="$NEUP_DIR/core/setup.sh"
 readonly LOGICA_SETUP="$NEUP_DIR/logica/setup.sh"
 
