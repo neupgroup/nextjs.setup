@@ -19,10 +19,17 @@ try {
   const values = {
     NEUP_APP_ID: base.identity?.applicationId,
     NEUP_APP_SECRET: '',
-    NEXT_PUBLIC_APP_BASEPATH: base.platforms?.web?.basepath,
+    NEXT_PUBLIC_APP_BASEPATH: Array.isArray(base.platforms)
+      ? base.platforms.find((platform) => platform.type === 'web' && platform.exists)?.basepath
+      : base.platforms?.web?.basepath,
     APP_ASSETS_LOGO_MAIN: base.assets?.logo?.main,
     APP_ASSETS_FAVICON: base.assets?.favicon?.path ?? base.assets?.favicon,
   };
+  for (const module of base.modules ?? []) {
+    if (!module?.isRequired || typeof module.name !== 'string' || !module.projectId) continue;
+    const key = `NEUP_${module.name.replace(/^neup\\./, '').replace(/[^a-z0-9]+/gi, '_').toUpperCase()}_PROJECT_ID`;
+    values[key] = module.projectId;
+  }
   const existing = fs.existsSync(envFile) ? fs.readFileSync(envFile, 'utf8') : '';
   const additions = [];
   for (const [key, value] of Object.entries(values)) {
