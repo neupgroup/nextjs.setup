@@ -11,21 +11,29 @@ node - "$PROJECT_DIR" <<'NODE'
 const fs = require('fs');
 const path = require('path');
 const projectDir = process.argv[2];
-const baseFile = path.join(projectDir, '@base/application.json');
+const baseDir = path.join(projectDir, '@base');
+const applicationFile = path.join(baseDir, 'application.json');
+const identityFile = path.join(baseDir, 'identity.json');
+const assetsFile = path.join(baseDir, 'assets.json');
+const modulesFile = path.join(baseDir, 'modules.json');
 const envFile = path.join(projectDir, '.env');
 
 try {
-  const base = JSON.parse(fs.readFileSync(baseFile, 'utf8'));
+  const readJson = (file, fallback) => fs.existsSync(file)
+    ? JSON.parse(fs.readFileSync(file, 'utf8'))
+    : fallback;
+  const application = readJson(applicationFile, {});
+  const identity = readJson(identityFile, {});
+  const assets = readJson(assetsFile, {});
+  const modules = readJson(modulesFile, []);
   const values = {
-    NEUP_APP_ID: base.identity?.applicationId,
+    NEUP_APP_ID: application.applicationId ?? application.projectId ?? identity.applicationId ?? application.id ?? identity.id,
     NEUP_APP_SECRET: '',
-    NEXT_PUBLIC_APP_BASEPATH: Array.isArray(base.platforms)
-      ? base.platforms.find((platform) => platform.type === 'web' && platform.exists)?.basepath
-      : base.platforms?.web?.basepath,
-    APP_ASSETS_LOGO_MAIN: base.assets?.logo?.main,
-    APP_ASSETS_FAVICON: base.assets?.favicon?.path ?? base.assets?.favicon,
+    NEXT_PUBLIC_APP_BASEPATH: application.basepath,
+    APP_ASSETS_LOGO_MAIN: assets.logo?.main,
+    APP_ASSETS_FAVICON: assets.favicon?.path ?? assets.favicon,
   };
-  for (const module of base.modules ?? []) {
+  for (const module of (Array.isArray(modules) ? modules : [])) {
     if (!module?.isRequired || typeof module.name !== 'string' || !module.projectId) continue;
     const key = `NEUP_${module.name.replace(/^neup\\./, '').replace(/[^a-z0-9]+/gi, '_').toUpperCase()}_PROJECT_ID`;
     values[key] = module.projectId;
@@ -42,7 +50,7 @@ try {
     for (const [key] of additions) console.log(`Added ${key} to .env.`);
   }
 } catch (error) {
-  console.error(`Unable to generate ${envFile} from ${baseFile}: ${error.message}`);
+  console.error(`Unable to generate environment from ${baseDir}: ${error.message}`);
   process.exitCode = 1;
 }
 NODE
