@@ -6,6 +6,7 @@ readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly NEUP_DIR="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 readonly CORE_SETUP="$NEUP_DIR/core/setup.sh"
 readonly LOGICA_SETUP="$NEUP_DIR/logica/setup.sh"
+readonly SHARED_ACCOUNT_SETUP="$NEUP_DIR/shared/account/setup.sh"
 
 if [[ ! -f "$CORE_SETUP" ]]; then
   printf 'Core setup was not found: %s\n' "$CORE_SETUP" >&2
@@ -17,8 +18,16 @@ if [[ ! -f "$LOGICA_SETUP" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$SHARED_ACCOUNT_SETUP" ]]; then
+  printf 'Shared account setup was not found: %s\n' "$SHARED_ACCOUNT_SETUP" >&2
+  exit 1
+fi
+
 printf 'Running neup.core setup.\n'
 bash "$CORE_SETUP" "$@"
 
 printf 'Running neup.logica setup.\n'
-exec bash "$LOGICA_SETUP" "$@"
+bash "$LOGICA_SETUP" "$@"
+
+printf 'Running neup.shared account setup.\n'
+exec bash "$SHARED_ACCOUNT_SETUP" "$@"
